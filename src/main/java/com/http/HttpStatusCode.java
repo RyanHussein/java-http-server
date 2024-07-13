@@ -26,4 +26,19 @@ public enum HttpStatusCode {
         this.STATUS_CODE = STATUS_CODE;
         this.MESSAGE = MESSAGE;
     }
+
+    /**
+     * Returns the HttpStatusCode enum constant corresponding to the given status code.
+     *
+     * @param code the numerical HTTP status code
+     * @return the HttpStatusCode enum constant, or null if no constant is found
+     */
+     static HttpStatusCode fromCode(int code) {
+        for (HttpStatusCode status : HttpStatusCode.values()) {
+            if (status.STATUS_CODE == code) {
+                return status;
+            }
+        }
+        return null;
+    }
 }

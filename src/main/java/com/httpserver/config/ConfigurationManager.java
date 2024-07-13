@@ -1,7 +1,6 @@
 package com.httpserver.config;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.httpserver.config.HttpConfigurationException.HttpConfigurationException;
 import com.httpserver.util.Json;
 
 import java.io.IOException;
@@ -59,5 +58,12 @@ public class ConfigurationManager {
             throw new HttpConfigurationException("Configuration not set.");
         }
         return configuration;
+    }
+
+    /**
+     * Clears the current configuration (for testing purposes).
+     */
+    public void clearConfiguration() {
+        configuration = null;
     }
 }

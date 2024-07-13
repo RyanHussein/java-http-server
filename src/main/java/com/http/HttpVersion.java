@@ -36,6 +36,10 @@ public enum HttpVersion {
      * @throws HttpParsingException if the given string representation does not match any supported HTTP version
      */
     public static HttpVersion getBestCompatibleVersion(String literalVersion) throws HttpParsingException {
+        if (literalVersion == null) {
+            throw new HttpParsingException(HttpStatusCode.SERVER_ERROR_505_HTTP_VERSION_NOT_SUPPORTED);
+        }
+
         Matcher matcher = httpVersionRegexPattern.matcher(literalVersion);
 
         if (!matcher.find() || matcher.groupCount() != 2) {

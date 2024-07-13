@@ -1,4 +1,4 @@
-package com.httpserver.config.HttpConfigurationException;
+package com.httpserver.config;
 
 /**
  * Exception thrown when there is a configuration error in the HTTP server.

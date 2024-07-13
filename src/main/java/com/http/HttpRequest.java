@@ -28,9 +28,12 @@ public class HttpRequest extends HttpMessage {
      * Sets the HTTP method of the request.
      *
      * @param method the HTTP method as a string
-     * @throws HttpParsingException if the method is not supported
+     * @throws HttpParsingException if the method is not supported or is null
      */
     void setMethod(String method) throws HttpParsingException {
+        if (method == null) {
+            throw new HttpParsingException(HttpStatusCode.SERVER_ERROR_501_NOT_IMPLEMENTED);
+        }
         for (HttpMethod m : HttpMethod.values()) {
             if (method.equals(m.name())) {
                 this.method = HttpMethod.valueOf(method);

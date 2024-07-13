@@ -13,7 +13,7 @@ public class HttpParsingException extends Exception {
      * @param errorCode the HTTP status code representing the error
      */
     public HttpParsingException(HttpStatusCode errorCode) {
-        super(errorCode.MESSAGE);
+        super(errorCode != null ? errorCode.MESSAGE : null);
         this.errorCode = errorCode;
     }
 
