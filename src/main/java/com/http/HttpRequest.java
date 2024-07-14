@@ -1,5 +1,8 @@
 package com.http;
 
+import java.util.Map;
+import java.util.TreeMap;
+
 /**
  * Represents a HTTP request.
  */
@@ -8,11 +11,13 @@ public class HttpRequest extends HttpMessage {
     private HttpMethod method;
     private String requestTarget;
     private HttpVersion httpVersion;
+    private final Map<String, String> headers;
 
     /**
      * Constructs an HttpRequest.
      */
     HttpRequest() {
+        headers = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
     }
 
     /**
@@ -85,5 +90,36 @@ public class HttpRequest extends HttpMessage {
             throw new HttpParsingException(HttpStatusCode.SERVER_ERROR_505_HTTP_VERSION_NOT_SUPPORTED);
         }
         this.httpVersion = HttpVersion.getBestCompatibleVersion(httpVersion);
+    }
+
+    /**
+     * Gets the headers of the request.
+     *
+     * @return the headers
+     */
+    Map<String, String> getHeaders() {
+        return headers;
+    }
+
+    /**
+     * Sets the headers of the request.
+     *
+     * @param headers the headers to set
+     * @throws HttpParsingException if the headers map or any key or value is null or empty
+     */
+    void setHeaders(Map<String, String> headers) throws HttpParsingException {
+        if (headers == null) {
+            throw new HttpParsingException(HttpStatusCode.CLIENT_ERROR_400_BAD_REQUEST);
+        }
+        for (Map.Entry<String, String> entry : headers.entrySet()) {
+            if (entry.getKey() == null || entry.getKey().trim().isEmpty()) {
+                throw new HttpParsingException(HttpStatusCode.CLIENT_ERROR_400_BAD_REQUEST);
+            }
+            if (entry.getValue() == null) {
+                throw new HttpParsingException(HttpStatusCode.CLIENT_ERROR_400_BAD_REQUEST);
+            }
+            // Trim key and value
+            this.headers.put(entry.getKey().trim(), entry.getValue().trim());
+        }
     }
 }

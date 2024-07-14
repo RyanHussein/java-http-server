@@ -7,6 +7,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Parses HTTP requests from an input stream.
@@ -100,9 +102,51 @@ public class HttpParser {
      *
      * @param reader the InputStreamReader to read from
      * @param request the HttpRequest object to update
+     * @throws HttpParsingException if there is an error parsing the headers
+     * @throws IOException if there is an I/O error
      */
-    private void parseHeaders(InputStreamReader reader, HttpRequest request) {
-        // Implementation for parsing headers
+    private void parseHeaders(InputStreamReader reader, HttpRequest request) throws HttpParsingException, IOException {
+        Map<String, String> headers = new HashMap<>();
+        StringBuilder processingDataBuffer = new StringBuilder();
+        String currentHeader = null;
+        int _byte;
+
+        while ((_byte = reader.read()) >= 0) {
+            if (_byte == CR) {
+                _byte = reader.read();
+                if (_byte == LF) {
+                    if (processingDataBuffer.length() == 0) {
+                        // End of headers
+                        request.setHeaders(headers);
+                        return;
+                    }
+                    String line = processingDataBuffer.toString();
+                    processingDataBuffer.setLength(0); // Clear the buffer for the next line
+
+                    if (Character.isWhitespace(line.charAt(0)) && currentHeader != null) {
+                        // Continuation of the previous header line
+                        headers.put(currentHeader, headers.get(currentHeader) + " " + line.trim());
+                    } else {
+                        int colonIndex = line.indexOf(":");
+                        if (colonIndex == -1) {
+                            throw new HttpParsingException(HttpStatusCode.CLIENT_ERROR_400_BAD_REQUEST); // Invalid header line
+                        }
+                        currentHeader = line.substring(0, colonIndex).trim();
+                        String headerValue = line.substring(colonIndex + 1);
+                        headers.put(currentHeader, headerValue.isEmpty() ? "" : headerValue.trim());
+                    }
+                } else {
+                    throw new HttpParsingException(HttpStatusCode.CLIENT_ERROR_400_BAD_REQUEST); // Invalid line ending
+                }
+            } else {
+                processingDataBuffer.append((char) _byte);
+            }
+        }
+
+        // Handles case where headers might be completely absent
+        if (processingDataBuffer.length() > 0) {
+            throw new HttpParsingException(HttpStatusCode.CLIENT_ERROR_400_BAD_REQUEST); // Premature end of input
+        }
     }
 
     /**
