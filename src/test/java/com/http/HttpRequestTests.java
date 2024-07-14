@@ -3,6 +3,7 @@ package com.http;
 import org.junit.jupiter.api.Test;
 
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -133,5 +134,119 @@ class HttpRequestTests {
         request.setHeaders(headers);
         assertEquals(1, request.getHeaders().size());
         assertEquals("example.com", request.getHeaders().get("Host"));
+    }
+
+    @Test
+    void testSetHeadersCaseInsensitiveHandling() throws HttpParsingException {
+        HttpRequest request = new HttpRequest();
+
+        // Use LinkedHashMap to ensure predictable order in the test
+        Map<String, String> headers = new LinkedHashMap<>();
+        headers.put("Host", "localhost");
+        headers.put("Content-Type", "application/json");
+        headers.put("HOST", "example.com"); // Different casing should overwrite
+
+        request.setHeaders(headers);
+
+        assertEquals(2, request.getHeaders().size());
+        assertEquals("example.com", request.getHeaders().get("host"));
+        assertEquals("application/json", request.getHeaders().get("content-type"));
+    }
+
+    @Test
+    void testSetHeadersOverwriteBehavior() throws HttpParsingException {
+        HttpRequest request = new HttpRequest();
+
+        // Use LinkedHashMap to ensure predictable order in the test
+        Map<String, String> headers = new LinkedHashMap<>();
+        headers.put("Accept", "text/html");
+        headers.put("accept", "application/xml"); // Different casing should overwrite
+
+        request.setHeaders(headers);
+
+        assertEquals(1, request.getHeaders().size());
+        assertEquals("application/xml", request.getHeaders().get("accept"));
+    }
+
+    @Test
+    void testSetAndGetBody() throws HttpParsingException {
+        HttpRequest request = new HttpRequest();
+
+        String body = "This is the body of the request.";
+        request.setBody(body);
+        assertEquals(body, request.getBody());
+    }
+
+    @Test
+    void testSetBodyInvalid() {
+        HttpRequest request = new HttpRequest();
+
+        assertThrows(HttpParsingException.class, () -> request.setBody(null));
+    }
+
+    @Test
+    void testSetHeadersWithLargeNumberOfHeaders() throws HttpParsingException {
+        HttpRequest request = new HttpRequest();
+
+        Map<String, String> headers = new LinkedHashMap<>();
+        for (int i = 0; i < 1000; i++) {
+            headers.put("Header-" + i, "value-" + i);
+        }
+
+        request.setHeaders(headers);
+        assertEquals(1000, request.getHeaders().size());
+        for (int i = 0; i < 1000; i++) {
+            assertEquals("value-" + i, request.getHeaders().get("header-" + i));
+        }
+    }
+
+    @Test
+    void testSetHeadersWithSpecialCharacters() throws HttpParsingException {
+        HttpRequest request = new HttpRequest();
+
+        Map<String, String> headers = new LinkedHashMap<>();
+        headers.put("X-Custom-Header", "value!@#$%^&*()_+{}|:\"<>?");
+        headers.put("Another-Header", "another_value-=[]\\;',./`~");
+
+        request.setHeaders(headers);
+        assertEquals(2, request.getHeaders().size());
+        assertEquals("value!@#$%^&*()_+{}|:\"<>?", request.getHeaders().get("x-custom-header"));
+        assertEquals("another_value-=[]\\;',./`~", request.getHeaders().get("another-header"));
+    }
+
+    @Test
+    void testSetHeadersEmptyMap() throws HttpParsingException {
+        HttpRequest request = new HttpRequest();
+
+        Map<String, String> headers = new LinkedHashMap<>();
+
+        request.setHeaders(headers);
+        assertEquals(0, request.getHeaders().size());
+    }
+
+    @Test
+    void testSetHeadersWithMixedCaseKeys() throws HttpParsingException {
+        HttpRequest request = new HttpRequest();
+
+        Map<String, String> headers = new LinkedHashMap<>();
+        headers.put("Header-One", "value1");
+        headers.put("header-Two", "value2");
+        headers.put("HEADER-THREE", "value3");
+
+        request.setHeaders(headers);
+        assertEquals(3, request.getHeaders().size());
+        assertEquals("value1", request.getHeaders().get("header-one"));
+        assertEquals("value2", request.getHeaders().get("header-two"));
+        assertEquals("value3", request.getHeaders().get("header-three"));
+    }
+
+    @Test
+    void testSetHeaderWithNullValue() {
+        HttpRequest request = new HttpRequest();
+
+        Map<String, String> headers = new LinkedHashMap<>();
+        headers.put("Header-With-Null-Value", null);
+
+        assertThrows(HttpParsingException.class, () -> request.setHeaders(headers));
     }
 }

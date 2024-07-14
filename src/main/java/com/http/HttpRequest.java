@@ -12,6 +12,7 @@ public class HttpRequest extends HttpMessage {
     private String requestTarget;
     private HttpVersion httpVersion;
     private final Map<String, String> headers;
+    private String body;
 
     /**
      * Constructs an HttpRequest.
@@ -111,15 +112,49 @@ public class HttpRequest extends HttpMessage {
         if (headers == null) {
             throw new HttpParsingException(HttpStatusCode.CLIENT_ERROR_400_BAD_REQUEST);
         }
+
+        // Clear existing headers
+        this.headers.clear();
+
         for (Map.Entry<String, String> entry : headers.entrySet()) {
-            if (entry.getKey() == null || entry.getKey().trim().isEmpty()) {
+            String key = entry.getKey();
+            String value = entry.getValue();
+
+            if (key == null || key.trim().isEmpty()) {
                 throw new HttpParsingException(HttpStatusCode.CLIENT_ERROR_400_BAD_REQUEST);
             }
-            if (entry.getValue() == null) {
+
+            if (value == null) {
                 throw new HttpParsingException(HttpStatusCode.CLIENT_ERROR_400_BAD_REQUEST);
             }
-            // Trim key and value
-            this.headers.put(entry.getKey().trim(), entry.getValue().trim());
+
+            // Normalise key to lower case, trim key and value, and store them
+            String normalizedKey = key.trim().toLowerCase();
+            String trimmedValue = value.trim();
+
+            this.headers.put(normalizedKey, trimmedValue);
         }
+    }
+
+    /**
+     * Gets the body of the request.
+     *
+     * @return the body
+     */
+    public String getBody() {
+        return body;
+    }
+
+    /**
+     * Sets the body of the request.
+     *
+     * @param body the body to set
+     * @throws HttpParsingException if the body is null
+     */
+    public void setBody(String body) throws HttpParsingException {
+        if (body == null) {
+            throw new HttpParsingException(HttpStatusCode.CLIENT_ERROR_400_BAD_REQUEST);
+        }
+        this.body = body;
     }
 }

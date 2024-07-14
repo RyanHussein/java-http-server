@@ -58,7 +58,7 @@ class HttpParserTests {
 
     @Test
     void testParseRequestLinePrematureEnd() {
-        String rawRequest = "GET / HTTP/1.1";
+        String rawRequest = "GET / ";
         InputStream inputStream = new ByteArrayInputStream(rawRequest.getBytes(StandardCharsets.US_ASCII));
 
         assertThrows(HttpParsingException.class, () -> parser.parseHttpRequest(inputStream));
@@ -125,8 +125,8 @@ class HttpParserTests {
 
         Map<String, String> headers = request.getHeaders();
         assertEquals(2, headers.size());
-        assertEquals("localhost", headers.get("host"));
-        assertEquals("keep-alive", headers.get("connection"));
+        assertEquals("localhost", headers.get("Host"));
+        assertEquals("keep-alive", headers.get("Connection"));
     }
 
     @Test
@@ -160,4 +160,38 @@ class HttpParserTests {
         assertEquals("example.com", headers.get("Host")); // Assuming the last header value is used
     }
 
+    @Test
+    void testParseBodyWithContentLength() throws Exception {
+        String rawRequest = "POST / HTTP/1.1\r\nHost: localhost\r\nContent-Length: 13\r\n\r\nHello, World!";
+        InputStream inputStream = new ByteArrayInputStream(rawRequest.getBytes(StandardCharsets.US_ASCII));
+        HttpRequest request = parser.parseHttpRequest(inputStream);
+
+        assertEquals("Hello, World!", request.getBody());
+    }
+
+    @Test
+    void testParseBodyWithChunkedTransferEncoding() throws Exception {
+        String rawRequest = "POST / HTTP/1.1\r\nHost: localhost\r\nTransfer-Encoding: chunked\r\n\r\n5\r\nHello\r\n8\r\n, World!\r\n0\r\n\r\n";
+        InputStream inputStream = new ByteArrayInputStream(rawRequest.getBytes(StandardCharsets.US_ASCII));
+        HttpRequest request = parser.parseHttpRequest(inputStream);
+
+        assertEquals("Hello, World!", request.getBody());
+    }
+
+    @Test
+    void testParseBodyWithInvalidChunkedTransferEncoding() {
+        String rawRequest = "POST / HTTP/1.1\r\nHost: localhost\r\nTransfer-Encoding: chunked\r\n\r\n5\r\nHello\r\n6\r\n, World!\r\n";
+        InputStream inputStream = new ByteArrayInputStream(rawRequest.getBytes(StandardCharsets.US_ASCII));
+
+        assertThrows(HttpParsingException.class, () -> parser.parseHttpRequest(inputStream));
+    }
+
+    @Test
+    void testParseBodyWithoutContentLengthOrTransferEncoding() throws Exception {
+        String rawRequest = "POST / HTTP/1.1\r\nHost: localhost\r\n\r\n";
+        InputStream inputStream = new ByteArrayInputStream(rawRequest.getBytes(StandardCharsets.US_ASCII));
+        HttpRequest request = parser.parseHttpRequest(inputStream);
+
+        assertEquals("", request.getBody());
+    }
 }

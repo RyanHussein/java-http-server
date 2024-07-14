@@ -18,6 +18,17 @@ public class HttpParsingException extends Exception {
     }
 
     /**
+     * Constructs a new HttpParsingException with the specified error code and detailed message.
+     *
+     * @param errorCode the HTTP status code representing the error
+     * @param message the detailed message
+     */
+    public HttpParsingException(HttpStatusCode errorCode, String message) {
+        super(message);
+        this.errorCode = errorCode;
+    }
+
+    /**
      * Gets the HTTP status code representing the error.
      *
      * @return the HTTP status code
