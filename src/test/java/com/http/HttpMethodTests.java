@@ -3,28 +3,28 @@ package com.http;
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 
+/**
+ * Unit tests for the HttpMethod enum class.
+ */
 class HttpMethodTests {
 
     @Test
     void testHttpMethodValues() {
         // Ensure the enum has the correct values
         assertEquals("GET", HttpMethod.GET.name());
-        assertEquals("POST", HttpMethod.POST.name());
         assertEquals("HEAD", HttpMethod.HEAD.name());
 
         // Ensure the enum values are in the correct order
         HttpMethod[] methods = HttpMethod.values();
-        assertEquals(3, methods.length);
+        assertEquals(2, methods.length);
         assertEquals(HttpMethod.GET, methods[0]);
-        assertEquals(HttpMethod.POST, methods[1]);
-        assertEquals(HttpMethod.HEAD, methods[2]);
+        assertEquals(HttpMethod.HEAD, methods[1]);
     }
 
     @Test
     void testHttpMethodValueOf() {
         // Ensure valueOf works for valid enum names
         assertEquals(HttpMethod.GET, HttpMethod.valueOf("GET"));
-        assertEquals(HttpMethod.POST, HttpMethod.valueOf("POST"));
         assertEquals(HttpMethod.HEAD, HttpMethod.valueOf("HEAD"));
     }
 
@@ -45,7 +45,6 @@ class HttpMethodTests {
     void testHttpMethodToString() {
         // Ensure toString returns the correct string representation
         assertEquals("GET", HttpMethod.GET.toString());
-        assertEquals("POST", HttpMethod.POST.toString());
         assertEquals("HEAD", HttpMethod.HEAD.toString());
     }
 }

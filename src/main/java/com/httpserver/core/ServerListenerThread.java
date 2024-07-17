@@ -14,7 +14,6 @@ public class ServerListenerThread extends Thread {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ServerListenerThread.class);
 
-    private final int port;
     private final String webroot;
     private final ServerSocket serverSocket;
 
@@ -26,9 +25,8 @@ public class ServerListenerThread extends Thread {
      * @throws IOException if an I/O error occurs when opening the socket
      */
     public ServerListenerThread(int port, String webroot) throws IOException {
-        this.port = port;
         this.webroot = webroot;
-        this.serverSocket = new ServerSocket(this.port);
+        this.serverSocket = new ServerSocket(port);
     }
 
     /**
@@ -40,7 +38,7 @@ public class ServerListenerThread extends Thread {
             while (serverSocket.isBound() && !serverSocket.isClosed()) {
                 Socket socket = serverSocket.accept();
                 LOGGER.info("Connection Accepted: {}", socket.getInetAddress());
-                HttpConnectionWorkerThread workerThread = new HttpConnectionWorkerThread(socket);
+                HttpConnectionWorkerThread workerThread = new HttpConnectionWorkerThread(socket, webroot);
                 workerThread.start();
             }
         } catch (IOException e) {

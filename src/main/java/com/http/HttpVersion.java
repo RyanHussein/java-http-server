@@ -64,4 +64,8 @@ public enum HttpVersion {
 
         return bestCompatible;
     }
+
+    public String getLiteral() {
+        return LITERAL;
+    }
 }

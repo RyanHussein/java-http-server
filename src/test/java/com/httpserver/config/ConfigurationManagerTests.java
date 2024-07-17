@@ -7,6 +7,9 @@ import java.nio.file.*;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+/**
+ * Unit tests for the ConfigurationManager class.
+ */
 class ConfigurationManagerTests {
 
     private static Path tempConfigFile;

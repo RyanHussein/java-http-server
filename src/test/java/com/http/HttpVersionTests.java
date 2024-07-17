@@ -4,6 +4,9 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+/**
+ * Unit tests for the HttpVersion enum class.
+ */
 class HttpVersionTests {
 
     @Test
@@ -50,5 +53,10 @@ class HttpVersionTests {
     @Test
     void testGetBestCompatibleVersionWithLowercase() {
         assertThrows(HttpParsingException.class, () -> HttpVersion.getBestCompatibleVersion("http/1.1"));
+    }
+
+    @Test
+    void testGetLiteral() {
+        assertEquals("HTTP/1.1", HttpVersion.HTTP_1_1.getLiteral());
     }
 }
